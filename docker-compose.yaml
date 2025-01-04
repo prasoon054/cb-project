@@ -1,0 +1,58 @@
+services:
+  user-service:
+    build:
+      context: ./user-service
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./user-service/.env
+    depends_on:
+      - postgres
+    networks:
+      - blog-network
+
+  blog-service:
+    build:
+      context: ./blog-service
+    ports:
+      - "5001:5001"
+    env_file:
+      - ./blog-service/.env
+    depends_on:
+      - postgres
+      - user-service
+    networks:
+      - blog-network
+
+  comment-service:
+    build:
+      context: ./comment-service
+    ports:
+      - "5002:5002"
+    env_file:
+      - ./comment-service/.env
+    depends_on:
+      - postgres
+      - blog-service
+    networks:
+      - blog-network
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 200521
+      POSTGRES_DB: cb_db
+    ports:
+      - "5430:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - blog-network
+
+networks:
+  blog-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
